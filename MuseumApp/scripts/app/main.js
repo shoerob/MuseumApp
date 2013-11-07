@@ -282,6 +282,14 @@ var app = (function () {
         var exhibitSelected = function (e) {
             mobileApp.navigate('views/exhibitView.html?uid=' + e.data.uid);
         };
+        var onAddArtifact = function (e) {
+            mobileApp.navigate('views/addArtifactView.html?uid=' + e.data.uid);
+/*            navigator.camera.getPicture(function(imageData) {
+                mobileApp.navigate('views/addArtifactView.html?uid=' + e.data.uid + '?imgData=' + imageData);
+            }, function(message) {
+                
+            }, { quality: 50 });*/
+        };
         var navigateHome = function () {
             mobileApp.navigate('#welcome');
         };
@@ -295,6 +303,7 @@ var app = (function () {
         return {
             exhibits: exhibitsModel.exhibits,
             exhibitSelected: exhibitSelected,
+            onAddArtifact: onAddArtifact,
             logout: logout
         };
     }());
@@ -354,14 +363,143 @@ var app = (function () {
             saveExhibit: saveExhibit
         };
     }());
+    
+    /**
+     * Artifacts
+     */
+    var artifactsModel = (function () {
+        var artifactModel = {
+            id: 'Id',
+            fields: {
+                Title: {
+                    field: 'Title',
+                    defaultValue: ''
+                },
+                Description: {
+                    field: 'Description',
+                    defaultValue: ''
+                },
+                Tag: {
+                    field: 'Tag',
+                    defaultValue: ''
+                },
+                CreatedAt: {
+                    field: 'CreatedAt',
+                    defaultValue: new Date()
+                },
+                UserId: {
+                    field: 'Owner',
+                    defaultValue: ''
+                },
+                ExihibitId: {
+                    field: 'ExihibitId',
+                    defaultValue: ''
+                }
+                
+            },
+            CreatedAtFormatted: function () {
+                return AppHelper.formatDate(this.get('CreatedAt'));
+            },
+            //PictureUrl: function () {
+            //    return AppHelper.resolvePictureUrl(this.get('Picture'));
+            //},
+            User: function () {
+                var userId = this.get('UserId');
+                var user = $.grep(usersModel.users(), function (e) {
+                    return e.Id === userId;
+                })[0];
+                return user ? {
+                    DisplayName: user.DisplayName,
+                    PictureUrl: ''//AppHelper.resolveProfilePictureUrl(user.Picture)
+                } : {
+                    DisplayName: 'Anonymous',
+                    PictureUrl: ''//AppHelper.resolveProfilePictureUrl()
+                };
+            }
+        };
+        var artifactsDataSource = new kendo.data.DataSource({
+            type: 'everlive',
+            schema: {
+                model: artifactModel
+            },
+            transport: {
+                // required by Everlive
+                typeName: 'Artifact'
+            },
+            change: function (e) {
+                console.log(e.items.length);
+                if (e.items && e.items.length > 0) {
+                    $('#no-artifacts-span').hide();
+                }
+                else {
+                    $('#no-artifacts-span').show();
+                }
+            },
+            sort: { field: 'CreatedAt', dir: 'desc' }
+        });
+        return {
+            artifacts: artifactsDataSource
+        };
+    }());
 
+    // add artifact view model
+    var addArtifactViewModel = (function () {
+        var $exhibitId;
+        var $newTitle;
+        var $newDesc;
+        var $newTag;
+        var titleValidator;
+        var descValidator;
+        var tagValidator;
+        var init = function () {
+            titleValidator = $('#enterTitle').kendoValidator().data("kendoValidator");
+            $newTitle = $('#newTitle');
+            descValidator = $('#enterDesc').kendoValidator().data("kendoValidator");
+            $newDesc = $('#newDesc');
+            tagValidator = $('#enterTag').kendoValidator().data("kendoValidator");
+            $newTag = $('#newTag');
+        };
+        var show = function (e) {
+            $exhibitId = e.view.params.uid;
+            $newTitle.val('');
+            titleValidator.hideMessages();
+            $newDesc.val('');
+            descValidator.hideMessages();
+            $newTag.val('');
+            tagValidator.hideMessages();
+        };
+        var saveArtifact = function () {
+            if (titleValidator.validate() && descValidator.validate() && tagValidator.validate()) {
+                var artifacts = artifactsModel.artifacts;
+                var artifact = artifacts.add();
+                artifact.Title = $newTitle.val();
+                artifact.Description = $newDesc.val();
+                artifact.Tag = $newTag.val();
+                artifact.UserId = usersModel.currentUser.get('data').Id;
+                artifact.ExihibitId = $exhibitId;
+                artifacts.one('sync', function () {
+                    mobileApp.navigate('#:back');
+                });
+                artifacts.sync();
+            }
+        };
+        return {
+            init: init,
+            show: show,
+            me: usersModel.currentUser,
+            saveArtifact: saveArtifact
+        };
+    }());
+    
+    
     return {
         viewModels: {
             login: loginViewModel,
             signup: singupViewModel,
             exhibits: exhibitsViewModel,
             exhibit: exhibitViewModel,
-            addExhibit: addExhibitViewModel
+            addExhibit: addExhibitViewModel,
+            addArtifact: addArtifactViewModel
         }
     };
 }());
