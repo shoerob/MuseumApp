@@ -129,7 +129,20 @@ var app = (function () {
                 return usersModel.load();
             })
             .then(function () {
-                mobileApp.navigate('views/exhibitsView.html');
+                museumsModel.museums.fetch(function(){
+                    var museums = this.data();
+                    var userId = usersModel.currentUser.get('data').Id;
+                	var museum = $.grep(museums, function (e) {
+                    	return e.UserId === userId;
+                	})[0];
+                	showError(museums.length);
+                    if(museum != undefined){
+                        mobileApp.navigate('views/exhibitsView.html');
+                    }
+                    else{
+                        mobileApp.navigate('views/addMuseumView.html');
+                    }
+                });
             })
             .then(null,
                   function (err) {
@@ -146,7 +159,20 @@ var app = (function () {
                 })
                 .then(function () {
                     mobileApp.hideLoading();
-                    mobileApp.navigate('views/exhibitsView.html');
+                    museumsModel.museums.fetch(function(){
+                        var museums = this.data();
+                        var userId = usersModel.currentUser.get('data').Id;
+                        var museum = $.grep(museums, function (e) {
+                            return e.UserId === userId;
+                        })[0];
+                        showError(museums.length);
+                        if(museum != undefined){
+                            mobileApp.navigate('views/exhibitsView.html');
+                        }
+                        else{
+                            mobileApp.navigate('views/addMuseumView.html');
+                        }
+                    });
                 })
                 .then(null, function (err) {
                     mobileApp.hideLoading();
@@ -180,7 +206,8 @@ var app = (function () {
                 dataSource)
             .then(function () {
                 showAlert("Registration successful");
-                mobileApp.navigate('#welcome');
+                mobileApp.navigate('views/addMuseumView.html');
+                //mobileApp.navigate('#welcome');
             },
                   function (err) {
                       showError(err.message);
@@ -205,7 +232,115 @@ var app = (function () {
             signup: signup
         };
     }());
-
+    
+    var museumsModel = (function () {
+        var museumModel = {
+            id: 'Id',
+            fields: {
+                Title: {
+                    field: 'Title',
+                    defaultValue: ''
+                },
+                Description: {
+                    field: 'Description',
+                    defaultValue: ''
+                },
+                Tag: {
+                    field: 'Tag',
+                    defaultValue: ''
+                },
+                CreatedAt: {
+                    field: 'CreatedAt',
+                    defaultValue: new Date()
+                },
+                UserId: {
+                    field: 'Owner',
+                    defaultValue: ''
+                },
+                
+            },
+            CreatedAtFormatted: function () {
+                return AppHelper.formatDate(this.get('CreatedAt'));
+            },
+            User: function () {
+                var userId = this.get('UserId');
+                var user = $.grep(usersModel.users(), function (e) {
+                    return e.Id === userId;
+                })[0];
+                return user ? {
+                    DisplayName: user.DisplayName,
+                    PictureUrl: ''
+                } : {
+                    DisplayName: 'Anonymous',
+                    PictureUrl: ''
+                };
+            }
+        };
+            
+        var museumsDataSource = new kendo.data.DataSource({
+            type: 'everlive',
+            schema: {
+                model: museumModel
+            },
+            transport: {
+                // required by Everlive
+                typeName: 'Museum'
+            },
+            change: function (e) {
+            },
+            sort: { field: 'CreatedAt', dir: 'desc' }
+        });
+        return {
+            museums: museumsDataSource
+        };
+    }());
+    
+    // add museum view model
+    var addMuseumViewModel = (function () {
+        var $newTitle;
+        var $newDesc;
+        var $newTag;
+        var titleValidator;
+        var descValidator;
+        var tagValidator;
+        var init = function () {
+            titleValidator = $('#enterTitle').kendoValidator().data("kendoValidator");
+            $newTitle = $('#newTitle');
+            descValidator = $('#enterDesc').kendoValidator().data("kendoValidator");
+            $newDesc = $('#newDesc');
+            tagValidator = $('#enterTag').kendoValidator().data("kendoValidator");
+            $newTag = $('#newTag');
+        };
+        var show = function () {
+            $newTitle.val('');
+            titleValidator.hideMessages();
+            $newDesc.val('');
+            descValidator.hideMessages();
+            $newTag.val('');
+            tagValidator.hideMessages();
+        };
+        var saveMuseum = function () {
+            if (titleValidator.validate() && descValidator.validate() && tagValidator.validate()) {
+                var museums = museumsModel.museums;
+                var museum = museums.add();
+                museum.Title = $newTitle.val();
+                museum.Description = $newDesc.val();
+                museum.Tag = $newTag.val();
+                museum.UserId = usersModel.currentUser.get('data').Id;
+                museums.one('sync', function () {
+                   mobileApp.navigate('views/exhibitsView.html');
+                });
+                museums.sync();
+            }
+        };
+        return {
+            init: init,
+            show: show,
+            me: usersModel.currentUser,
+            saveMuseum: saveMuseum
+        };
+    }());    
+    
     var exhibitsModel = (function () {
         var exhibitModel = {
             id: 'Id',
@@ -359,6 +494,7 @@ var app = (function () {
         viewModels: {
             login: loginViewModel,
             signup: singupViewModel,
+            addMuseum: addMuseumViewModel,
             exhibits: exhibitsViewModel,
             exhibit: exhibitViewModel,
             addExhibit: addExhibitViewModel
