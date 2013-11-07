@@ -1,0 +1,24 @@
+<div data-role="view" id="view-all-exhibits" data-layout="default" class="exhibits-view" data-model="app.viewModels.exhibits">
+    <header data-role="header">
+        <div data-role="navbar">
+            Exhibits
+            <a class="nav-button" data-align="left" data-role="backbutton" data-click="app.viewModels.exhibits.logout">Log out</a>
+            <a class="nav-button" data-align="right" data-role="button" data-icon="add" href="views/addExhibitView.html"></a>
+        </div>
+    </header>
+
+    <ul id="exhibits-listview" data-style="inset" data-role="listview" data-template="exhibitTemplate"
+        data-bind="source: exhibits"></ul>
+    <p id="no-exhibits-span" hidden="hidden" class="no-items-msg">
+        <b>You have no exhibits yet.</b><br /><br />Tap on the plus sign and share your exhibit.
+    </p>
+</div>
+
+<!-- Exhibits ListView Template -->
+<script type="text/x-kendo-template" id="exhibitTemplate">
+    <div data-role="touch" data-bind="events: { tap: exhibitSelected }">
+    	<div>
+        	<a class="user-share-txt">${Title}</a>
+		</div>
+    </div>
+</script>
