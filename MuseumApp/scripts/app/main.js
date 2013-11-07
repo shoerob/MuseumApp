@@ -135,7 +135,6 @@ var app = (function () {
                 	var museum = $.grep(museums, function (e) {
                     	return e.UserId === userId;
                 	})[0];
-                	showError(museums.length);
                     if(museum != undefined){
                         mobileApp.navigate('views/exhibitsView.html');
                     }
@@ -165,7 +164,6 @@ var app = (function () {
                         var museum = $.grep(museums, function (e) {
                             return e.UserId === userId;
                         })[0];
-                        showError(museums.length);
                         if(museum != undefined){
                             mobileApp.navigate('views/exhibitsView.html');
                         }
