@@ -36,7 +36,7 @@ var app = (function () {
 
     var applicationSettings = {
         emptyGuid: '00000000-0000-0000-0000-000000000000',
-        apiKey: 'KC9sb9xb1mMSLRFB',
+        apiKey: 'pxjW9x5tvwHdFXzI',
         scheme: 'http'
     };
 
@@ -129,7 +129,7 @@ var app = (function () {
                 return usersModel.load();
             })
             .then(function () {
-                mobileApp.navigate('views/activitiesView.html');
+                mobileApp.navigate('views/exhibitsView.html');
             })
             .then(null,
                   function (err) {
@@ -146,7 +146,7 @@ var app = (function () {
                 })
                 .then(function () {
                     mobileApp.hideLoading();
-                    mobileApp.navigate('views/activitiesView.html');
+                    mobileApp.navigate('views/exhibitsView.html');
                 })
                 .then(null, function (err) {
                     mobileApp.hideLoading();
@@ -206,37 +206,38 @@ var app = (function () {
         };
     }());
 
-    var activitiesModel = (function () {
-        var activityModel = {
+    var exhibitsModel = (function () {
+        var exhibitModel = {
             id: 'Id',
             fields: {
-                Text: {
-                    field: 'Text',
+                Title: {
+                    field: 'Title',
+                    defaultValue: ''
+                },
+                Description: {
+                    field: 'Description',
+                    defaultValue: ''
+                },
+                Tag: {
+                    field: 'Tag',
                     defaultValue: ''
                 },
                 CreatedAt: {
                     field: 'CreatedAt',
                     defaultValue: new Date()
                 },
-                Picture: {
-                    fields: 'Picture',
-                    defaultValue: ''
-                },
                 UserId: {
-                    field: 'UserId',
+                    field: 'Owner',
                     defaultValue: ''
                 },
-                Likes: {
-                    field: 'Likes',
-                    defaultValue: []
-                }
+                
             },
             CreatedAtFormatted: function () {
                 return AppHelper.formatDate(this.get('CreatedAt'));
             },
-            PictureUrl: function () {
-                return AppHelper.resolvePictureUrl(this.get('Picture'));
-            },
+            //PictureUrl: function () {
+            //    return AppHelper.resolvePictureUrl(this.get('Picture'));
+            //},
             User: function () {
                 var userId = this.get('UserId');
                 var user = $.grep(usersModel.users(), function (e) {
@@ -244,41 +245,42 @@ var app = (function () {
                 })[0];
                 return user ? {
                     DisplayName: user.DisplayName,
-                    PictureUrl: AppHelper.resolveProfilePictureUrl(user.Picture)
+                    PictureUrl: ''//AppHelper.resolveProfilePictureUrl(user.Picture)
                 } : {
                     DisplayName: 'Anonymous',
-                    PictureUrl: AppHelper.resolveProfilePictureUrl()
+                    PictureUrl: ''//AppHelper.resolveProfilePictureUrl()
                 };
             }
         };
-        var activitiesDataSource = new kendo.data.DataSource({
+        var exhibitsDataSource = new kendo.data.DataSource({
             type: 'everlive',
             schema: {
-                model: activityModel
+                model: exhibitModel
             },
             transport: {
                 // required by Everlive
-                typeName: 'Activities'
+                typeName: 'Exhibit'
             },
             change: function (e) {
+                console.log(e.items.length);
                 if (e.items && e.items.length > 0) {
-                    $('#no-activities-span').hide();
+                    $('#no-exhibits-span').hide();
                 }
                 else {
-                    $('#no-activities-span').show();
+                    $('#no-exhibits-span').show();
                 }
             },
             sort: { field: 'CreatedAt', dir: 'desc' }
         });
         return {
-            activities: activitiesDataSource
+            exhibits: exhibitsDataSource
         };
     }());
 
-    // activities view model
-    var activitiesViewModel = (function () {
-        var activitySelected = function (e) {
-            mobileApp.navigate('views/activityView.html?uid=' + e.data.uid);
+    // exhibits view model
+    var exhibitsViewModel = (function () {
+        var exhibitSelected = function (e) {
+            mobileApp.navigate('views/exhibitView.html?uid=' + e.data.uid);
         };
         var navigateHome = function () {
             mobileApp.navigate('#welcome');
@@ -291,51 +293,65 @@ var app = (function () {
             });
         };
         return {
-            activities: activitiesModel.activities,
-            activitySelected: activitySelected,
+            exhibits: exhibitsModel.exhibits,
+            exhibitSelected: exhibitSelected,
             logout: logout
         };
     }());
 
-    // activity details view model
-    var activityViewModel = (function () {
+    // exhibit details view model
+    var exhibitViewModel = (function () {
         return {
             show: function (e) {
-                var activity = activitiesModel.activities.getByUid(e.view.params.uid);
-                kendo.bind(e.view.element, activity, kendo.mobile.ui);
+                var exhibit = exhibitModel.exhibits.getByUid(e.view.params.uid);
+                kendo.bind(e.view.element, exhibit, kendo.mobile.ui);
             }
         };
     }());
 
-    // add activity view model
-    var addActivityViewModel = (function () {
-        var $newStatus;
-        var validator;
+    // add exhibit view model
+    var addExhibitViewModel = (function () {
+        var $newTitle;
+        var $newDesc;
+        var $newTag;
+        var titleValidator;
+        var descValidator;
+        var tagValidator;
         var init = function () {
-            validator = $('#enterStatus').kendoValidator().data("kendoValidator");
-            $newStatus = $('#newStatus');
+            titleValidator = $('#enterTitle').kendoValidator().data("kendoValidator");
+            $newTitle = $('#newTitle');
+            descValidator = $('#enterDesc').kendoValidator().data("kendoValidator");
+            $newDesc = $('#newDesc');
+            tagValidator = $('#enterTag').kendoValidator().data("kendoValidator");
+            $newTag = $('#newTag');
         };
         var show = function () {
-            $newStatus.val('');
-            validator.hideMessages();
+            $newTitle.val('');
+            titleValidator.hideMessages();
+            $newDesc.val('');
+            descValidator.hideMessages();
+            $newTag.val('');
+            tagValidator.hideMessages();
         };
-        var saveActivity = function () {
-            if (validator.validate()) {
-                var activities = activitiesModel.activities;
-                var activity = activities.add();
-                activity.Text = $newStatus.val();
-                activity.UserId = usersModel.currentUser.get('data').Id;
-                activities.one('sync', function () {
+        var saveExhibit = function () {
+            if (titleValidator.validate() && descValidator.validate() && tagValidator.validate()) {
+                var exhibits = exhibitsModel.exhibits;
+                var exhibit = exhibits.add();
+                exhibit.Title = $newTitle.val();
+                exhibit.Description = $newDesc.val();
+                exhibit.Tag = $newTag.val();
+                exhibit.UserId = usersModel.currentUser.get('data').Id;
+                exhibits.one('sync', function () {
                     mobileApp.navigate('#:back');
                 });
-                activities.sync();
+                exhibits.sync();
             }
         };
         return {
             init: init,
             show: show,
             me: usersModel.currentUser,
-            saveActivity: saveActivity
+            saveExhibit: saveExhibit
         };
     }());
 
@@ -343,9 +359,9 @@ var app = (function () {
         viewModels: {
             login: loginViewModel,
             signup: singupViewModel,
-            activities: activitiesViewModel,
-            activity: activityViewModel,
-            addActivity: addActivityViewModel
+            exhibits: exhibitsViewModel,
+            exhibit: exhibitViewModel,
+            addExhibit: addExhibitViewModel
         }
     };
 }());

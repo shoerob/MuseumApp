@@ -1,0 +1,31 @@
+<div data-role="view" id="share" data-layout="default" data-transition="overlay:down" class="share-view"
+    data-init="app.viewModels.addExhibit.init" data-show="app.viewModels.addExhibit.show" data-model="app.viewModels.addExhibit">
+    <header data-role="header">
+        <div data-role="navbar">
+            Exhibit
+            <a class="nav-button" data-align="left" data-role="backbutton">Cancel</a>
+            <a class="nav-button" data-align="right" data-role="button" data-bind="click: saveExhibit">Add Exhibit</a>
+        </div>
+    </header>
+    <div class="user-info">
+        <h2 data-bind="text: me.get('data').DisplayName">Me</h2>
+    </div>
+    <div id="enterTitle" class="share-form-wrp">
+        <div class="user-share">
+            <textarea id="newTitle" placeholder="Enter Title" required validationMessage="Title is required!"></textarea>
+            <div id="newTitleValidation" class="validation">Title is required!</div>
+        </div>
+    </div>
+    <div id="enterDesc" class="share-form-wrp">
+        <div class="user-share">
+            <textarea id="newDesc" placeholder="Enter Description" required validationMessage="Description is required!"></textarea>
+            <div id="newDescValidation" class="validation">Description is required!</div>
+        </div>
+    </div>
+    <div id="enterTag" class="share-form-wrp">
+        <div class="user-share">
+            <textarea id="newTag" placeholder="Enter Tag" required validationMessage="Tag is required!"></textarea>
+            <div id="newTagValidation" class="validation">Tag is required!</div>
+        </div>    
+    </div>
+</div>
