@@ -421,7 +421,7 @@ var app = (function () {
             $hamsterJuice = e.data.uid;
             navigator.camera.getPicture(function(imageData) {
                 setTimeout(function() {
-                    mobileApp.navigate('views/addArtifactView.html?uid=' + $hamsterJuice + '?imgData=' + imageData);                    
+                    mobileApp.navigate('views/addArtifactView.html?uid=' + $hamsterJuice + '&imgData=' + imageData);                    
                 }, 1);
             }, function(message) {
                 setTimeout(function() {
@@ -533,6 +533,10 @@ var app = (function () {
                 ExihibitId: {
                     field: 'ExihibitId',
                     defaultValue: ''
+                },
+                Image: {
+                    field: 'Image',
+                    defaultValue: ''
                 }
                 
             },
@@ -584,6 +588,7 @@ var app = (function () {
     // add artifact view model
     var addArtifactViewModel = (function () {
         var $exhibitId;
+        var $imgData;
         var $newTitle;
         var $newDesc;
         var $newTag;
@@ -600,6 +605,7 @@ var app = (function () {
         };
         var show = function (e) {
             $exhibitId = e.view.params.uid;
+            $imgData = e.view.params.imgData;
             $newTitle.val('');
             titleValidator.hideMessages();
             $newDesc.val('');
@@ -609,17 +615,37 @@ var app = (function () {
         };
         var saveArtifact = function () {
             if (titleValidator.validate() && descValidator.validate() && tagValidator.validate()) {
-                var artifacts = artifactsModel.artifacts;
-                var artifact = artifacts.add();
-                artifact.Title = $newTitle.val();
-                artifact.Description = $newDesc.val();
-                artifact.Tag = $newTag.val();
-                artifact.UserId = usersModel.currentUser.get('data').Id;
-                artifact.ExihibitId = $exhibitId;
-                artifacts.one('sync', function () {
-                    mobileApp.navigate('#:back');
-                });
-                artifacts.sync();
+                
+                // upload teh file
+                var imageURI = $imgData;
+                // the retrieved URI of the file, e.g. using navigator.camera.getPicture()
+                var uploadUrl = Everlive.$.Files.getUploadUrl();
+                var options = new FileUploadOptions();
+                options.fileKey = "file";
+                options.fileName = "artifact.png";
+                options.mimeType="image/png";
+                options.headers = Everlive.$.buildAuthHeader();
+                var ft = new FileTransfer();
+                ft.upload(imageURI, uploadUrl,  function (r) {
+                        //alert($imgData);
+                        //alert("Success: " + JSON.stringify(r));
+                        
+                        var artifacts = artifactsModel.artifacts;
+                        var artifact = artifacts.add();
+                        artifact.Title = $newTitle.val();
+                        artifact.Description = $newDesc.val();
+                        artifact.Tag = $newTag.val();
+                        artifact.UserId = usersModel.currentUser.get('data').Id;
+                        artifact.ExihibitId = $exhibitId;
+                    	artifact.Image = r.Id;  // THIS NO WORKIE!!!!! WHaaaaaaa!
+                        artifacts.one('sync', function () {
+                            mobileApp.navigate('#:back');
+                        });
+                        artifacts.sync();
+                
+                },  function(error){
+                    alert("An error has occurred: Code = " + error.code);
+                }, options);
             }
         };
         return {
