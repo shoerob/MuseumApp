@@ -9,7 +9,7 @@
 }
 #friendsApp.km-ios, #friendsApp.km-android, #friendsApp.km-ios .km-list > li
 {
-    font-weight: normal;    
+    font-weight: normal;
 }
 #friendsApp.km-ios .km-listinset, #friendsApp.km-ios .km-listgroupinset .km-list
 {
@@ -258,6 +258,10 @@ textarea
     height: 8rem;
     font-size: 1rem;
 }
+/*textarea.small
+{
+    height: 2rem !important;
+}*/
 .km-list textarea
 {
     right: 0;

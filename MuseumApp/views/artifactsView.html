@@ -1,0 +1,26 @@
+<div data-role="view" id="view-all-artifacts" data-layout="default" class="artifacts-view" data-model="app.viewModels.artifacts"
+     data-init="app.viewModels.artifacts.init">
+    <header data-role="header">
+        <div data-role="navbar">
+            Artifacts
+            <a class="nav-button" data-align="left" data-role="button" data-click="app.viewModels.artifacts.back">Back</a>
+            <a class="nav-button" data-align="right" data-role="button" data-icon="add" href="views/addArtifactView.html"></a>
+        </div>
+    </header>
+
+    <ul id="artifacts-listview" data-style="inset" data-role="listview" data-template="artifactTemplate"
+        data-bind="source: artifacts"></ul>
+    <p id="no-artifacts-span" hidden="hidden" class="no-items-msg">
+        <b>You have no artifacts yet.</b><br /><br />Tap on the plus sign and share your artifact.
+    </p>
+</div>
+
+<!-- Artifacts ListView Template -->
+<script type="text/x-kendo-template" id="artifactTemplate">
+    <div data-role="touch" data-bind="events: { tap: artifactSelected }">
+    	<div>
+        	<img data-bind="attr:{src: PictureUrl}" alt="missing" width="20px" height:"20px" />
+        	<a class="user-share-txt">${Title}</a>
+		</div>
+    </div>
+</script>

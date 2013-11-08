@@ -89,6 +89,8 @@ var app = (function () {
 
     var mobileApp = new kendo.mobile.Application(document.body, { transition: 'slide', layout: 'mobile-tabstrip' });
 
+    var museumId = applicationSettings.emptyGuid;
+    
     var usersModel = (function () {
         var currentUser = kendo.observable({ data: null });
         var usersData;
@@ -136,7 +138,8 @@ var app = (function () {
                     	return e.UserId === userId;
                 	})[0];
                     if(museum != undefined){
-                        mobileApp.navigate('views/exhibitsView.html');
+                        museumId = museum.Id;
+                        mobileApp.navigate('views/exhibitsView.html?museumId=' + museumId);
                     }
                     else{
                         mobileApp.navigate('views/addMuseumView.html');
@@ -165,7 +168,8 @@ var app = (function () {
                             return e.UserId === userId;
                         })[0];
                         if(museum != undefined){
-                            mobileApp.navigate('views/exhibitsView.html');
+                            museumId = museum.Id;
+                        	mobileApp.navigate('views/exhibitsView.html?museumId=' + museumId);
                         }
                         else{
                             mobileApp.navigate('views/addMuseumView.html');
@@ -205,7 +209,6 @@ var app = (function () {
             .then(function () {
                 showAlert("Registration successful");
                 mobileApp.navigate('views/addMuseumView.html');
-                //mobileApp.navigate('#welcome');
             },
                   function (err) {
                       showError(err.message);
@@ -329,6 +332,7 @@ var app = (function () {
                    mobileApp.navigate('views/exhibitsView.html');
                 });
                 museums.sync();
+                //todo: how to get id of newly created museum?
             }
         };
         return {
@@ -363,6 +367,14 @@ var app = (function () {
                     field: 'Owner',
                     defaultValue: ''
                 },
+                MuseumId: {
+                    field: 'MuseumId',
+                    defaultValue: applicationSettings.emptyGuid
+                },
+                IsPublic:{
+                    field: 'IsPublic',
+                    defaultValue: false
+                }
                 
             },
             CreatedAtFormatted: function () {
@@ -395,7 +407,6 @@ var app = (function () {
                 typeName: 'Exhibit'
             },
             change: function (e) {
-                console.log(e.items.length);
                 if (e.items && e.items.length > 0) {
                     $('#no-exhibits-span').hide();
                 }
@@ -414,8 +425,22 @@ var app = (function () {
     var exhibitsViewModel = (function () {
         var $hamsterJuice; // it's like a monster energy drink, but it's not!
         
+        var filteredExhibits;
+        
+        var init = function(e){
+            //var museumId = e.sender.params.museumId;
+
+            //exhibitsModel.exhibits.filter( { field: "MuseumId", operator: "eq", value: museumId });
+            //exhibitsModel.exhibits.fetch(function(){
+            //    var data = this.data();
+            //    filteredExhibits = $.grep(data, function (e) {
+            //    	return e.MuseumId === museumId;
+            //	});                                        
+            //});;
+        };
         var exhibitSelected = function (e) {
-            mobileApp.navigate('views/exhibitView.html?uid=' + e.data.uid);
+            mobileApp.navigate('views/artifactsView.html?exhibitId=' + e.data.Id);
+            //mobileApp.navigate('views/exhibitView.html?uid=' + e.data.uid);
         };
         var onAddArtifact = function (e) {
             $hamsterJuice = e.data.uid;
@@ -443,6 +468,7 @@ var app = (function () {
             exhibits: exhibitsModel.exhibits,
             exhibitSelected: exhibitSelected,
             onAddArtifact: onAddArtifact,
+            init: init,
             logout: logout
         };
     }());
@@ -452,6 +478,8 @@ var app = (function () {
         return {
             show: function (e) {
                 var exhibit = exhibitModel.exhibits.getByUid(e.view.params.uid);
+                alert(e.view.params.uid);
+                alert(exhibit.Title);
                 kendo.bind(e.view.element, exhibit, kendo.mobile.ui);
             }
         };
@@ -462,6 +490,7 @@ var app = (function () {
         var $newTitle;
         var $newDesc;
         var $newTag;
+        var $newPublic;
         var titleValidator;
         var descValidator;
         var tagValidator;
@@ -472,6 +501,7 @@ var app = (function () {
             $newDesc = $('#newDesc');
             tagValidator = $('#enterTag').kendoValidator().data("kendoValidator");
             $newTag = $('#newTag');
+            $newPublic = $('#newPublic');
         };
         var show = function () {
             $newTitle.val('');
@@ -488,7 +518,9 @@ var app = (function () {
                 exhibit.Title = $newTitle.val();
                 exhibit.Description = $newDesc.val();
                 exhibit.Tag = $newTag.val();
+                exhibit.IsPublic = $newPublic.is(':checked');
                 exhibit.UserId = usersModel.currentUser.get('data').Id;
+                exhibit.MuseumId = museumId;
                 exhibits.one('sync', function () {
                     mobileApp.navigate('#:back');
                 });
@@ -533,15 +565,19 @@ var app = (function () {
                 ExihibitId: {
                     field: 'ExihibitId',
                     defaultValue: ''
+                },
+                Image: {
+                    field: 'Image',
+                    defaultValue: applicationSettings.emptyGuid
                 }
                 
             },
             CreatedAtFormatted: function () {
                 return AppHelper.formatDate(this.get('CreatedAt'));
             },
-            //PictureUrl: function () {
-            //    return AppHelper.resolvePictureUrl(this.get('Picture'));
-            //},
+            PictureUrl: function () {
+                return AppHelper.resolvePictureUrl(this.get('Image'));
+            },
             User: function () {
                 var userId = this.get('UserId');
                 var user = $.grep(usersModel.users(), function (e) {
@@ -581,6 +617,49 @@ var app = (function () {
         };
     }());
 
+    // exhibits view model
+    var artifactsViewModel = (function () {
+        var filteredArtifacts;
+        
+        var init = function(e){
+            var exhibitId = e.sender.params.exhibitId;
+
+            artifactsModel.artifacts.filter( { field: "ExihibitId", operator: "eq", value: exhibitId });
+            artifactsModel.artifacts.fetch(function(){
+                var data = this.data();
+               	filteredArtifacts = $.grep(data, function (e) {
+                	return e.ExihibitId === exhibitId;
+            	});
+            	console.log(filteredArtifacts);                                        
+            });
+        }
+        
+        var artifactSelected = function (e) {
+            mobileApp.navigate('views/artifactView.html?uid=' + e.data.uid);
+        };
+        var navigateHome = function () {
+            mobileApp.navigate('#welcome');
+        };
+        var back = function() {
+            artifactsModel.artifacts.filter([]);
+            mobileApp.navigate('views/exhibitsView.html?museumId=' + museumId);
+        }
+        var logout = function () {
+            AppHelper.logout()
+            .then(navigateHome, function (err) {
+                showError(err.message);
+                navigateHome();
+            });
+        };
+        return {
+            artifacts: artifactsModel.artifacts,
+            init: init,
+            exhibitSelected: artifactSelected,
+            back: back,
+            logout: logout
+        };
+    }());
+    
     // add artifact view model
     var addArtifactViewModel = (function () {
         var $exhibitId;
@@ -639,6 +718,7 @@ var app = (function () {
             exhibits: exhibitsViewModel,
             exhibit: exhibitViewModel,
             addExhibit: addExhibitViewModel,
+            artifacts: artifactsViewModel,
             addArtifact: addArtifactViewModel
         }
     };

@@ -7,12 +7,9 @@
             <a class="nav-button" data-align="right" data-role="button" data-bind="click: saveExhibit">Add Exhibit</a>
         </div>
     </header>
-    <div class="user-info">
-        <h2 data-bind="text: me.get('data').DisplayName">Me</h2>
-    </div>
     <div id="enterTitle" class="share-form-wrp">
         <div class="user-share">
-            <textarea id="newTitle" placeholder="Enter Title" required validationMessage="Title is required!"></textarea>
+            <textarea id="newTitle" class="small" placeholder="Enter Title" required validationMessage="Title is required!"></textarea>
             <div id="newTitleValidation" class="validation">Title is required!</div>
         </div>
     </div>
@@ -24,8 +21,12 @@
     </div>
     <div id="enterTag" class="share-form-wrp">
         <div class="user-share">
-            <textarea id="newTag" placeholder="Enter Tag" required validationMessage="Tag is required!"></textarea>
+            <textarea type="text" id="newTag" class="small" placeholder="Enter Tag" required validationMessage="Tag is required!"></textarea>
             <div id="newTagValidation" class="validation">Tag is required!</div>
         </div>    
+    </div>
+    <div id="enterPublic" class="share-form-wrp">
+        <input id="newPublic" type="checkbox" />
+        <span>Make Public</span>
     </div>
 </div>
