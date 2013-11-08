@@ -87,7 +87,7 @@ var app = (function () {
         }
     };
 
-    var mobileApp = new kendo.mobile.Application(document.body, { transition: 'slide', layout: 'mobile-tabstrip' });
+    var mobileApp = new kendo.mobile.Application(document.body, { transition: 'slide', layout: 'mobile-tabstrip', skin: 'flat' });
 
     var usersModel = (function () {
         var currentUser = kendo.observable({ data: null });
