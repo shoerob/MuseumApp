@@ -630,4 +630,15 @@ background-color: #A36A57;
 .km-tablet .km-ios .profile-view .km-list.def-list .lbl, .km-tablet .km-ios .profile-view .km-list.def-list .val
 {
     font-size: 1.4em;
-} 
+}
+
+
+/* Logo */
+
+.logo {
+    background: url('images/MyseumLogo.png') no-repeat;
+    height: 77px;
+    text-indent: 999999px;
+    width: 273px;
+    overflow: hidden;
+}
