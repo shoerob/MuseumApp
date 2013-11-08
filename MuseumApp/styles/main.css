@@ -306,7 +306,6 @@ textarea
 {
     margin: 1.5rem !important;
     font-size: 1rem;
-    color: #ffc;
 }
 .no-items-msg b
 {
@@ -632,6 +631,17 @@ background-color: #A36A57;
     font-size: 1.4em;
 }
 
+
+/* Add button */
+
+.add:after {
+    content: "+";
+    color: #fff;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-weight: bold;
+}
 
 /* Logo */
 
