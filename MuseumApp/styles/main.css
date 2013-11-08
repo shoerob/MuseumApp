@@ -306,7 +306,6 @@ textarea
 {
     margin: 1.5rem !important;
     font-size: 1rem;
-    color: #ffc;
 }
 .no-items-msg b
 {
@@ -630,4 +629,43 @@ background-color: #A36A57;
 .km-tablet .km-ios .profile-view .km-list.def-list .lbl, .km-tablet .km-ios .profile-view .km-list.def-list .val
 {
     font-size: 1.4em;
-} 
+}
+
+
+/* Add button */
+
+.add:after {
+    content: "+";
+    color: #fff;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-weight: bold;
+}
+
+/* Logo */
+
+.logo {
+    background: url('images/MyseumLogo.png') #fff no-repeat;
+    height: 77px;
+    text-indent: 999999px;
+    width: 273px;
+    overflow: hidden;
+}
+
+/* pane adjustments for iOS */
+
+.km-on-ios .km-view {
+    padding-top: 20px;
+}
+
+
+/* Exhibits list */
+
+#exhibits-listview li {
+    font-weight: bold;
+}
+
+#exhibits-listview li .km-button {
+    float: right;
+}
