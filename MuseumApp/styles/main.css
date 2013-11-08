@@ -340,13 +340,13 @@ textarea
     margin-left: 1em;
     margin-right:1em;
     color: #fff;
-    text-align: right;
+    text-align: left;
     line-height: .9;
     font-size: 1.5em;
     font-weight: normal;
     color: #e6e6e6;
 }
-.welcome-scrn h1 b
+/*.welcome-scrn h1 b
 {
     display: block;
     font-size: 3em;
@@ -370,7 +370,7 @@ textarea
     background-size: cover;
     background-color: transparent;
     
-}
+}*/
 .welcome-scrn .group-wrp
 {
     margin: 1.5em 2em 0;
