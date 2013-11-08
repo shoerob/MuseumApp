@@ -412,16 +412,22 @@ var app = (function () {
 
     // exhibits view model
     var exhibitsViewModel = (function () {
+        var $hamsterJuice; // it's like a monster energy drink, but it's not!
+        
         var exhibitSelected = function (e) {
             mobileApp.navigate('views/exhibitView.html?uid=' + e.data.uid);
         };
         var onAddArtifact = function (e) {
-            mobileApp.navigate('views/addArtifactView.html?uid=' + e.data.uid);
-/*            navigator.camera.getPicture(function(imageData) {
-                mobileApp.navigate('views/addArtifactView.html?uid=' + e.data.uid + '?imgData=' + imageData);
+            $hamsterJuice = e.data.uid;
+            navigator.camera.getPicture(function(imageData) {
+                setTimeout(function() {
+                    mobileApp.navigate('views/addArtifactView.html?uid=' + $hamsterJuice + '?imgData=' + imageData);                    
+                }, 1);
             }, function(message) {
-                
-            }, { quality: 50 });*/
+                setTimeout(function() {
+                    alert.show("Failure.");
+                });
+            }, { quality: 50 });
         };
         var navigateHome = function () {
             mobileApp.navigate('#welcome');
