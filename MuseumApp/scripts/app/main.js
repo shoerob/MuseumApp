@@ -713,7 +713,8 @@ var app = (function () {
                         artifact.Tag = $newTag.val();
                         artifact.UserId = usersModel.currentUser.get('data').Id;
                         artifact.ExihibitId = $exhibitId;
-                    	artifact.Image = r.Id;  // THIS NO WORKIE!!!!! WHaaaaaaa!
+                    	//alert(JSON.stringify(r.response.Result[0].Id));
+                    	artifact.Image = r.response.Result[0].Id;  // THIS NO WORKIE!!!!! WHaaaaaaa!
                         artifacts.one('sync', function () {
                             mobileApp.navigate('#:back');
                         });
