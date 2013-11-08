@@ -636,9 +636,26 @@ background-color: #A36A57;
 /* Logo */
 
 .logo {
-    background: url('images/MyseumLogo.png') no-repeat;
+    background: url('images/MyseumLogo.png') #fff no-repeat;
     height: 77px;
     text-indent: 999999px;
     width: 273px;
     overflow: hidden;
+}
+
+/* pane adjustments for iOS */
+
+.km-on-ios .km-view {
+    top: 20px;
+}
+
+
+/* Exhibits list */
+
+#exhibits-listview li {
+    font-weight: bold;
+}
+
+#exhibits-listview li .km-button {
+    float: right;
 }
