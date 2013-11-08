@@ -646,7 +646,7 @@ background-color: #A36A57;
 /* pane adjustments for iOS */
 
 .km-on-ios .km-view {
-    top: 20px;
+    padding-top: 20px;
 }
 
 
